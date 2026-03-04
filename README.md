@@ -85,6 +85,48 @@ If you already have agent windows open in an existing session, just attach to it
 | Gemini CLI | pane title contains "Ready", "Working", or "Action Required" | ⏸ Waiting, ● Working, ‼ Needs You |
 | Claude Code | coming soon | — |
 
+## Gemini telemetry (CTX column)
+
+The **CTX** column shows how much of the context window the current Gemini session has consumed. This requires local telemetry to be enabled in the Gemini CLI.
+
+Add the following to `~/.gemini/settings.json` (create the file if it doesn't exist):
+
+```json
+{
+  "telemetry": {
+    "enabled": true,
+    "target": "local",
+    "outfile": ".gemini/telemetry.log"
+  }
+}
+```
+
+If you already have a `settings.json`, merge the `"telemetry"` block in — don't create a second root object. A complete example with other common settings:
+
+```json
+{
+  "general": {
+    "sessionRetention": {
+      "enabled": true,
+      "maxAge": "30d",
+      "warningAcknowledged": true
+    }
+  },
+  "telemetry": {
+    "enabled": true,
+    "target": "local",
+    "outfile": ".gemini/telemetry.log"
+  },
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  }
+}
+```
+
+Without telemetry enabled the CTX column will show `—` for all Gemini windows.
+
 ## Notes
 
 - **Quitting ai9s does not kill your agents.** The tmux windows and the processes running in them keep going. Just re-run `ai9s` to get the dashboard back.

@@ -6,6 +6,14 @@ import (
 	"strings"
 )
 
+// SessionInfo holds the most recent token counts for a single Gemini process.
+// input_token_count grows with each turn as the conversation accumulates,
+// so the latest value represents the current context window utilization.
+type SessionInfo struct {
+	LastInputTokens int64
+	Model           string
+}
+
 // Stats holds aggregated token usage and cost across all Gemini sessions
 // found in the local telemetry log.
 type Stats struct {
@@ -14,7 +22,8 @@ type Stats struct {
 	TotalOutput   int64
 	TotalThoughts int64
 	TotalTokens   int64
-	EstimatedCost float64 // USD, approximate
+	EstimatedCost float64            // USD, approximate
+	Sessions      map[int64]SessionInfo // keyed by process PID
 }
 
 // modelPricing maps known Gemini model names to USD per million tokens.
@@ -52,11 +61,17 @@ func LoadStats(logPath string) (Stats, error) {
 		return Stats{}, err
 	}
 
-	stats := Stats{LogSizeBytes: info.Size()}
+	stats := Stats{
+		LogSizeBytes: info.Size(),
+		Sessions:     make(map[int64]SessionInfo),
+	}
 
 	for _, raw := range splitObjects(data) {
 		var ev struct {
 			Attributes map[string]any `json:"attributes"`
+			Resource   struct {
+				RawAttributes map[string]any `json:"_rawAttributes"`
+			} `json:"resource"`
 		}
 		if err := json.Unmarshal(raw, &ev); err != nil {
 			continue
@@ -82,6 +97,15 @@ func LoadStats(logPath string) (Stats, error) {
 		}
 		stats.EstimatedCost += float64(input) / 1e6 * pricing[0]
 		stats.EstimatedCost += float64(output+thoughts) / 1e6 * pricing[1]
+
+		// Track per-PID context usage. input_token_count accumulates each
+		// turn, so the most recent event gives current context utilization.
+		if pid := toInt64(ev.Resource.RawAttributes["process.pid"]); pid > 0 {
+			stats.Sessions[pid] = SessionInfo{
+				LastInputTokens: input,
+				Model:           model,
+			}
+		}
 	}
 
 	lastSize = info.Size()

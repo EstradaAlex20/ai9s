@@ -19,6 +19,8 @@ type WindowRow struct {
 	Status       agent.Status
 	PaneTitle    string
 	ActivityTime time.Time
+	ContextPct   float64 // 0–100, percent of context window consumed
+	ContextOK    bool    // true if context data is available
 }
 
 // table wraps tview.Table and owns the window list display.
@@ -26,7 +28,7 @@ type table struct {
 	*tview.Table
 }
 
-var columnHeaders = []string{"#", "NAME", "AGENT", "STATUS", "AGE"}
+var columnHeaders = []string{"#", "NAME", "AGENT", "STATUS", "CTX", "AGE"}
 
 func newTable() *table {
 	t := tview.NewTable().
@@ -73,10 +75,12 @@ func (t *table) refresh(rows []WindowRow) {
 
 		t.SetCell(row, 3, statusCell(w.Status))
 
+		t.SetCell(row, 4, contextCell(w.ContextPct, w.ContextOK))
+
 		age := formatAge(time.Since(w.ActivityTime))
-		t.SetCell(row, 4, tview.NewTableCell(age).
+		t.SetCell(row, 5, tview.NewTableCell(age).
 			SetTextColor(tcell.ColorGray).
-			SetExpansion(columnExpansion(4)))
+			SetExpansion(columnExpansion(5)))
 	}
 
 	// Keep selection in bounds after a refresh.
@@ -113,6 +117,23 @@ func statusCell(s agent.Status) *tview.TableCell {
 		color = tcell.ColorCornflowerBlue
 	}
 	return tview.NewTableCell(text).SetTextColor(color).SetExpansion(columnExpansion(3))
+}
+
+func contextCell(pct float64, ok bool) *tview.TableCell {
+	if !ok {
+		return tview.NewTableCell("—").
+			SetTextColor(tcell.ColorGray).
+			SetExpansion(columnExpansion(4))
+	}
+	text := fmt.Sprintf("%.0f%%", pct)
+	color := tcell.ColorGreen
+	switch {
+	case pct >= 80:
+		color = tcell.ColorRed
+	case pct >= 50:
+		color = tcell.ColorYellow
+	}
+	return tview.NewTableCell(text).SetTextColor(color).SetExpansion(columnExpansion(4))
 }
 
 func columnExpansion(col int) int {

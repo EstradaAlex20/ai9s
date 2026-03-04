@@ -46,11 +46,16 @@ func fetchRows() []ui.WindowRow {
 	if err != nil {
 		return nil
 	}
+
+	// Load stats (file-size cached, cheap to call every second).
+	stats, _ := gemini.LoadStats(geminiTelemetryLog)
+
 	rows := make([]ui.WindowRow, 0, len(windows))
 	for _, w := range windows {
 		agentType := agent.DetectAgentType(w.PaneCommand, w.PaneTitle)
 		status := agent.DetectStatus(agentType, w.PaneTitle)
-		rows = append(rows, ui.WindowRow{
+
+		row := ui.WindowRow{
 			ID:           w.ID,
 			Index:        w.Index,
 			Name:         w.Name,
@@ -58,7 +63,20 @@ func fetchRows() []ui.WindowRow {
 			Status:       status,
 			PaneTitle:    w.PaneTitle,
 			ActivityTime: w.ActivityTime,
-		})
+		}
+
+		// Resolve context usage: pane PID -> child agent PID -> telemetry session.
+		if w.PanePID > 0 && stats.Sessions != nil {
+			childPID := tmux.ChildPID(w.PanePID)
+			if childPID > 0 {
+				if info, ok := stats.Sessions[int64(childPID)]; ok {
+					row.ContextPct = float64(info.LastInputTokens) / 1_000_000 * 100
+					row.ContextOK = true
+				}
+			}
+		}
+
+		rows = append(rows, row)
 	}
 	return rows
 }

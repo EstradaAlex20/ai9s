@@ -16,6 +16,7 @@ type Window struct {
 	Name         string    // window name
 	PaneTitle    string    // terminal title set by the CLI tool in pane 0
 	PaneCommand  string    // current foreground command in pane 0 (e.g. "gemini")
+	PanePID      int       // PID of the shell process running in pane 0
 	ActivityTime time.Time // last activity timestamp
 }
 
@@ -28,7 +29,7 @@ func ListWindows() ([]Window, error) {
 	}
 
 	out, err := exec.Command("tmux", "list-panes", "-s", "-F",
-		"#{window_id}|#{window_index}|#{window_name}|#{pane_index}|#{pane_title}|#{pane_current_command}|#{window_activity}",
+		"#{window_id}|#{window_index}|#{window_name}|#{pane_index}|#{pane_title}|#{pane_current_command}|#{pane_pid}|#{window_activity}",
 	).Output()
 	if err != nil {
 		return nil, fmt.Errorf("tmux list-panes: %w", err)
@@ -42,7 +43,7 @@ func ListWindows() ([]Window, error) {
 			continue
 		}
 		parts := strings.Split(line, "|")
-		if len(parts) != 7 {
+		if len(parts) != 8 {
 			continue
 		}
 
@@ -66,7 +67,8 @@ func ListWindows() ([]Window, error) {
 		seen[windowID] = true
 
 		index, _ := strconv.Atoi(parts[1])
-		activityTs, _ := strconv.ParseInt(parts[6], 10, 64)
+		panePID, _ := strconv.Atoi(parts[6])
+		activityTs, _ := strconv.ParseInt(parts[7], 10, 64)
 
 		windows = append(windows, Window{
 			ID:           windowID,
@@ -74,6 +76,7 @@ func ListWindows() ([]Window, error) {
 			Name:         parts[2],
 			PaneTitle:    parts[4],
 			PaneCommand:  parts[5],
+			PanePID:      panePID,
 			ActivityTime: time.Unix(activityTs, 0),
 		})
 	}
