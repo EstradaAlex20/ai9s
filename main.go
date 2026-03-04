@@ -12,6 +12,28 @@ import (
 
 const geminiTelemetryLog = "~/.gemini/telemetry.log"
 
+// statusSince tracks when each window last changed status so the AGE column
+// reflects time-in-current-status rather than time-since-last-terminal-output.
+// The latter resets to zero while an agent is streaming, making age useless.
+var statusSince = map[string]struct {
+	status agent.Status
+	since  time.Time
+}{}
+
+// ageFor returns the time the window entered its current status.
+// If the status changed since the last call, the clock resets to now.
+func ageFor(windowID string, current agent.Status) time.Time {
+	if st, ok := statusSince[windowID]; ok && st.status == current {
+		return st.since
+	}
+	t := time.Now()
+	statusSince[windowID] = struct {
+		status agent.Status
+		since  time.Time
+	}{current, t}
+	return t
+}
+
 func main() {
 	sessionName := tmux.SessionName()
 	app := ui.New(sessionName, fetchRows())
@@ -62,7 +84,7 @@ func fetchRows() []ui.WindowRow {
 			Agent:        agentType,
 			Status:       status,
 			PaneTitle:    w.PaneTitle,
-			ActivityTime: w.ActivityTime,
+			ActivityTime: ageFor(w.ID, status),
 		}
 
 		// Resolve context usage: pane PID -> child agent PID -> telemetry session.
