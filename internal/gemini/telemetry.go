@@ -70,7 +70,8 @@ func LoadStats(logPath string) (Stats, error) {
 		var ev struct {
 			Attributes map[string]any `json:"attributes"`
 			Resource   struct {
-				RawAttributes map[string]any `json:"_rawAttributes"`
+				// _rawAttributes is an array of [key, value] pairs, not a map.
+				RawAttributes [][]any `json:"_rawAttributes"`
 			} `json:"resource"`
 		}
 		if err := json.Unmarshal(raw, &ev); err != nil {
@@ -100,7 +101,7 @@ func LoadStats(logPath string) (Stats, error) {
 
 		// Track per-PID context usage. input_token_count accumulates each
 		// turn, so the most recent event gives current context utilization.
-		if pid := toInt64(ev.Resource.RawAttributes["process.pid"]); pid > 0 {
+		if pid := rawAttrInt64(ev.Resource.RawAttributes, "process.pid"); pid > 0 {
 			stats.Sessions[pid] = SessionInfo{
 				LastInputTokens: input,
 				Model:           model,
@@ -144,6 +145,19 @@ func expandHome(path string) string {
 		return home + path[1:]
 	}
 	return path
+}
+
+// rawAttrInt64 looks up a key in _rawAttributes (a [][key, value] array) and
+// returns the value as int64. Returns 0 if the key is not found.
+func rawAttrInt64(attrs [][]any, key string) int64 {
+	for _, kv := range attrs {
+		if len(kv) == 2 {
+			if k, ok := kv[0].(string); ok && k == key {
+				return toInt64(kv[1])
+			}
+		}
+	}
+	return 0
 }
 
 func toInt64(v any) int64 {
