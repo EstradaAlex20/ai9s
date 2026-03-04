@@ -28,16 +28,10 @@ func New(sessionName string, rows []WindowRow) *App {
 	a.table  = newTable()
 	a.footer = newFooter()
 
-	// Divider lines between sections.
-	topDivider    := divider()
-	bottomDivider := divider()
-
 	a.root = tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(a.header,       3, 0, false).
-		AddItem(topDivider,     1, 0, false).
-		AddItem(a.table,        0, 1, true).
-		AddItem(bottomDivider,  1, 0, false).
-		AddItem(a.footer,       1, 0, false)
+		AddItem(a.header, 3, 0, false).
+		AddItem(a.table,  0, 1, true).
+		AddItem(a.footer, 1, 0, false)
 	a.root.SetBackgroundColor(tcell.ColorDefault)
 
 	a.tview.SetRoot(a.root, true).SetFocus(a.table)
@@ -86,11 +80,4 @@ func (a *App) handleKey(event *tcell.EventKey) *tcell.EventKey {
 	return event
 }
 
-// divider returns a 1-row horizontal line.
-func divider() *tview.TextView {
-	tv := tview.NewTextView().SetText("─")
-	tv.SetBackgroundColor(tcell.ColorDefault)
-	tv.SetTextColor(tcell.ColorDarkGray)
-	return tv
-}
 

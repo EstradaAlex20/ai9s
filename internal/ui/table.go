@@ -34,6 +34,8 @@ func newTable() *table {
 		SetFixed(1, 0)              // freeze header row
 	t.SetBackgroundColor(tcell.ColorDefault)
 	t.SetSelectedStyle(tcell.StyleDefault.Background(tcell.ColorDarkSlateGray))
+	t.SetBorder(true)
+	t.SetBorderColor(tcell.ColorDarkGray)
 
 	// Draw column headers once — they never change.
 	for col, h := range columnHeaders {
