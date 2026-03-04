@@ -36,6 +36,8 @@ func newTable() *table {
 	t.SetSelectedStyle(tcell.StyleDefault.Background(tcell.ColorDarkSlateGray))
 	t.SetBorder(true)
 	t.SetBorderColor(tcell.ColorDarkGray)
+	t.SetTitle("[::b] windows [-]")
+	t.SetTitleColor(tcell.ColorAqua)
 
 	// Draw column headers once — they never change.
 	for col, h := range columnHeaders {

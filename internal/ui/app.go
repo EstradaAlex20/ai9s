@@ -29,7 +29,7 @@ func New(sessionName string, rows []WindowRow) *App {
 	a.footer = newFooter()
 
 	a.root = tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(a.header, 3, 0, false).
+		AddItem(a.header, 4, 0, false).
 		AddItem(a.table,  0, 1, true).
 		AddItem(a.footer, 1, 0, false)
 	a.root.SetBackgroundColor(tcell.ColorDefault)

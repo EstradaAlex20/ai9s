@@ -8,7 +8,13 @@ import (
 	"github.com/rivo/tview"
 )
 
-// header is the top bar showing the app name, session, and key hints.
+const logoText = `  ___    _  ___   ___
+ / _ \  (_)/ _ \ / __|
+| |_| | | |\__, |\__ \
+ \__,_/ |_|  /_/ |___/`
+
+// header is the top bar: session info on the left, key hints in the center,
+// logo on the right.
 type header struct {
 	*tview.Flex
 	title *tview.TextView
@@ -23,13 +29,20 @@ func newHeader(sessionName string) *header {
 
 	menu := tview.NewTextView().
 		SetDynamicColors(true).
-		SetTextAlign(tview.AlignRight).
-		SetText("[yellow]<enter>[-] switch    [yellow]<n>[-] new\n[yellow]<k>[-] kill      [yellow]<r>[-] rename\n[yellow]<q>[-] quit      [yellow]<?>[-] help")
+		SetTextAlign(tview.AlignCenter).
+		SetText("[yellow]<enter>[-] switch  [yellow]<n>[-] new\n[yellow]<k>[-] kill    [yellow]<r>[-] rename\n[yellow]<q>[-] quit    [yellow]<?>[-] help")
 	menu.SetBackgroundColor(tcell.ColorDefault)
 
+	logo := tview.NewTextView().
+		SetDynamicColors(true).
+		SetTextAlign(tview.AlignRight).
+		SetText("[limegreen]" + logoText + "[-]")
+	logo.SetBackgroundColor(tcell.ColorDefault)
+
 	flex := tview.NewFlex().SetDirection(tview.FlexColumn).
-		AddItem(title, 0, 1, false).
-		AddItem(menu, 40, 0, false)
+		AddItem(title, 20, 0, false).
+		AddItem(menu,  0,  1, false).
+		AddItem(logo,  24, 0, false)
 	flex.SetBackgroundColor(tcell.ColorDefault)
 
 	return &header{Flex: flex, title: title, menu: menu}
