@@ -54,7 +54,7 @@ func newHeader(sessionName string) *header {
 // updateStats re-renders the left panel with current telemetry data.
 func (h *header) updateStats(stats gemini.Stats) {
 	h.title.SetText(fmt.Sprintf(
-		"[::b]ai9s[-]\n[gray]session: %s[-]\n\n[gray]log:    %s[-]\n[gray]tokens: %s  [white]~$%.4f[-]",
+		"[::b]ai9s[-]\n[gray]session: %s[-]\n[gray]log:    %s[-]\n[gray]tokens: %s[-]\n[white]cost:   ~$%.4f[-]",
 		h.sessionName,
 		formatBytes(stats.LogSizeBytes),
 		formatTokens(stats.TotalTokens),
