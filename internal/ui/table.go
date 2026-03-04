@@ -9,9 +9,9 @@ import (
 	"github.com/rivo/tview"
 )
 
-// windowRow is the UI's view of a single agent window — raw tmux data plus
+// WindowRow is the UI's view of a single agent window — raw tmux data plus
 // derived agent type and status.
-type windowRow struct {
+type WindowRow struct {
 	ID           string
 	Index        int
 	Name         string
@@ -47,7 +47,7 @@ func newTable() *table {
 }
 
 // refresh replaces all data rows with the current window list.
-func (t *table) refresh(rows []windowRow) {
+func (t *table) refresh(rows []WindowRow) {
 	// Remove all existing data rows (keep header at row 0).
 	for t.GetRowCount() > 1 {
 		t.RemoveRow(1)
@@ -83,7 +83,7 @@ func (t *table) refresh(rows []windowRow) {
 
 // selectedID returns the window ID of the currently highlighted row, or ""
 // if nothing is selected.
-func (t *table) selectedID(rows []windowRow) string {
+func (t *table) selectedID(rows []WindowRow) string {
 	row, _ := t.GetSelection()
 	idx := row - 1 // subtract header
 	if idx < 0 || idx >= len(rows) {
@@ -92,8 +92,8 @@ func (t *table) selectedID(rows []windowRow) string {
 	return rows[idx].ID
 }
 
-// selectedRow returns the windowRow for the currently highlighted row.
-func (t *table) selectedRow(rows []windowRow) *windowRow {
+// selectedRow returns the WindowRow for the currently highlighted row.
+func (t *table) selectedRow(rows []WindowRow) *WindowRow {
 	row, _ := t.GetSelection()
 	idx := row - 1
 	if idx < 0 || idx >= len(rows) {

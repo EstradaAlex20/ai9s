@@ -81,6 +81,15 @@ func ListWindows() ([]Window, error) {
 	return windows, nil
 }
 
+// SessionName returns the name of the current tmux session.
+func SessionName() string {
+	out, err := exec.Command("tmux", "display-message", "-p", "#{session_name}").Output()
+	if err != nil {
+		return "unknown"
+	}
+	return strings.TrimSpace(string(out))
+}
+
 // selfWindowID returns the tmux window ID of the pane this process is
 // running in, by reading $TMUX_PANE and asking tmux for its window.
 func selfWindowID() (string, error) {

@@ -1,9 +1,6 @@
 package ui
 
 import (
-	"time"
-
-	"github.com/EstradaAlex20/ai9s/internal/agent"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -15,13 +12,13 @@ type App struct {
 	header   *header
 	table    *table
 	footer   *footer
-	rows     []windowRow
+	rows     []WindowRow
 }
 
 // New creates the App with the given tmux session name. The rows parameter
 // is the initial (possibly hardcoded) window list — wiring in live data comes
 // in the next step.
-func New(sessionName string, rows []windowRow) *App {
+func New(sessionName string, rows []WindowRow) *App {
 	a := &App{
 		tview:  tview.NewApplication(),
 		rows:   rows,
@@ -65,7 +62,7 @@ func (a *App) Stop() {
 }
 
 // SetRows replaces the window list and redraws. Safe to call from any goroutine.
-func (a *App) SetRows(rows []windowRow) {
+func (a *App) SetRows(rows []WindowRow) {
 	a.tview.QueueUpdateDraw(func() {
 		a.rows = rows
 		a.redraw()
@@ -97,14 +94,3 @@ func divider() *tview.TextView {
 	return tv
 }
 
-// HardcodedRows returns fake data for visual testing — used until live
-// tmux polling is wired in (step 5).
-func HardcodedRows() []windowRow {
-	now := time.Now()
-	return []windowRow{
-		{ID: "@1", Index: 1, Name: "refactor-auth", Agent: agent.AgentGemini, Status: agent.StatusWorking,  PaneTitle: "...Working",     ActivityTime: now.Add(-14 * time.Minute)},
-		{ID: "@2", Index: 2, Name: "write-tests",   Agent: agent.AgentGemini, Status: agent.StatusNeedsYou, PaneTitle: "Action Required", ActivityTime: now.Add(-8 * time.Minute)},
-		{ID: "@3", Index: 3, Name: "db-schema",     Agent: agent.AgentGemini, Status: agent.StatusWaiting,  PaneTitle: "Ready",           ActivityTime: now.Add(-2 * time.Minute)},
-		{ID: "@4", Index: 4, Name: "fix-bug",       Agent: agent.AgentUnknown, Status: agent.StatusUnknown, PaneTitle: "",                ActivityTime: now.Add(-31 * time.Minute)},
-	}
-}

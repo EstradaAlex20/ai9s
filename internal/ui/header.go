@@ -46,7 +46,7 @@ func newFooter() *footer {
 	return &footer{tv}
 }
 
-func (f *footer) update(windows []windowRow) {
+func (f *footer) update(windows []WindowRow) {
 	counts := map[agent.Status]int{}
 	for _, w := range windows {
 		counts[w.Status]++
