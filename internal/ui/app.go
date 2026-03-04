@@ -35,7 +35,7 @@ func New(sessionName string, rows []WindowRow) *App {
 	a.prompt = newPromptBar()
 
 	a.root = tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(a.header, 4, 0, false).
+		AddItem(a.header, 5, 0, false).
 		AddItem(a.table,  0, 1, true).
 		AddItem(a.prompt, 0, 0, false). // hidden until needed
 		AddItem(a.footer, 1, 0, false)

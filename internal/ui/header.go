@@ -8,10 +8,11 @@ import (
 	"github.com/rivo/tview"
 )
 
-const logoText = `  ___    _  ___   ___
- / _ \  (_)/ _ \ / __|
-| |_| | | |\__, |\__ \
- \__,_/ |_|  /_/ |___/`
+const logoText = `    _     _  ___  ____
+   / \   (_)/ _ \/ ___|
+  / _ \  | | (_) \___ \
+ / ___ \ | |\__, |___) |
+/_/   \_\|_|  /_/|____/`
 
 // header is the top bar: session info on the left, key hints in the center,
 // logo on the right.
@@ -42,7 +43,7 @@ func newHeader(sessionName string) *header {
 	flex := tview.NewFlex().SetDirection(tview.FlexColumn).
 		AddItem(title, 20, 0, false).
 		AddItem(menu,  0,  1, false).
-		AddItem(logo,  24, 0, false)
+		AddItem(logo,  26, 0, false)
 	flex.SetBackgroundColor(tcell.ColorDefault)
 
 	return &header{Flex: flex, title: title, menu: menu}
