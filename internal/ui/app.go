@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 
+	"github.com/EstradaAlex20/ai9s/internal/gemini"
 	"github.com/EstradaAlex20/ai9s/internal/tmux"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -69,6 +70,13 @@ func (a *App) Run() error {
 // Stop cleanly shuts down the TUI.
 func (a *App) Stop() {
 	a.tview.Stop()
+}
+
+// SetStats updates the telemetry stats in the header. Safe to call from any goroutine.
+func (a *App) SetStats(stats gemini.Stats) {
+	a.tview.QueueUpdateDraw(func() {
+		a.header.updateStats(stats)
+	})
 }
 
 // SetRows replaces the window list and redraws. Safe to call from any goroutine.

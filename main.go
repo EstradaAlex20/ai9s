@@ -5,25 +5,34 @@ import (
 	"time"
 
 	"github.com/EstradaAlex20/ai9s/internal/agent"
+	"github.com/EstradaAlex20/ai9s/internal/gemini"
 	"github.com/EstradaAlex20/ai9s/internal/tmux"
 	"github.com/EstradaAlex20/ai9s/internal/ui"
 )
 
+const geminiTelemetryLog = "~/.gemini/telemetry.log"
+
 func main() {
 	sessionName := tmux.SessionName()
-
-	// Fetch initial rows synchronously before starting the event loop.
-	// SetRows uses QueueUpdateDraw which requires the event loop to be running,
-	// so we can't use it here — pass rows directly to New() instead.
 	app := ui.New(sessionName, fetchRows())
 
-	// All subsequent polls happen inside the goroutine, which runs concurrently
-	// with app.Run(), so the event loop is always alive when SetRows is called.
+	// Window list — refresh every second.
 	go func() {
 		ticker := time.NewTicker(time.Second)
 		defer ticker.Stop()
 		for range ticker.C {
 			app.SetRows(fetchRows())
+		}
+	}()
+
+	// Telemetry stats — refresh every 5 seconds (file-size cached, so cheap).
+	go func() {
+		ticker := time.NewTicker(5 * time.Second)
+		defer ticker.Stop()
+		for range ticker.C {
+			if stats, err := gemini.LoadStats(geminiTelemetryLog); err == nil {
+				app.SetStats(stats)
+			}
 		}
 	}()
 
