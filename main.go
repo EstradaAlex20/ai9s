@@ -39,7 +39,7 @@ func fetchRows() []ui.WindowRow {
 	}
 	rows := make([]ui.WindowRow, 0, len(windows))
 	for _, w := range windows {
-		agentType := agent.DetectAgentType(w.PaneCommand)
+		agentType := agent.DetectAgentType(w.PaneCommand, w.PaneTitle)
 		status := agent.DetectStatus(agentType, w.PaneTitle)
 		rows = append(rows, ui.WindowRow{
 			ID:           w.ID,

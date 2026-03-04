@@ -1,5 +1,7 @@
 package agent
 
+import "strings"
+
 // Status represents what an AI agent is currently doing.
 type Status int
 
@@ -19,30 +21,40 @@ const (
 	AgentUnknown AgentType = "unknown"
 )
 
-// DetectAgentType infers the agent from the foreground command name in pane 0.
-func DetectAgentType(command string) AgentType {
+// DetectAgentType infers the agent from the foreground command and pane title.
+// Gemini CLI runs under node, so the command alone is not sufficient — we also
+// check the pane title for known Gemini strings as a fallback.
+func DetectAgentType(command, paneTitle string) AgentType {
 	switch command {
 	case "gemini":
 		return AgentGemini
 	case "claude":
 		return AgentClaude
-	default:
-		return AgentUnknown
 	}
+	// Gemini CLI is a Node app, so pane_current_command shows "node".
+	// If the title contains any Gemini-specific string, treat it as Gemini.
+	if strings.Contains(paneTitle, "Ready") ||
+		strings.Contains(paneTitle, "Working") ||
+		strings.Contains(paneTitle, "Action Required") {
+		return AgentGemini
+	}
+	return AgentUnknown
 }
 
 // DetectStatus maps a pane title string to a Status for the given agent type.
-// Each agent sets its own terminal title strings.
+// Uses substring matching so surrounding emoji or whitespace is ignored.
 func DetectStatus(agentType AgentType, paneTitle string) Status {
 	switch agentType {
 	case AgentGemini:
-		switch paneTitle {
-		case "Ready":
-			return StatusWaiting
-		case "...Working":
-			return StatusWorking
-		case "Action Required":
+		// Check "Action Required" before "Working" to avoid any future ambiguity.
+		if strings.Contains(paneTitle, "Action Required") {
 			return StatusNeedsYou
+		}
+		if strings.Contains(paneTitle, "Working") {
+			return StatusWorking
+		}
+		if strings.Contains(paneTitle, "Ready") {
+			return StatusWaiting
 		}
 	case AgentClaude:
 		// TODO: add mappings once Claude Code pane titles are confirmed by testing.
