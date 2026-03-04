@@ -85,21 +85,16 @@ func (t *table) refresh(rows []WindowRow) {
 	}
 }
 
-// selectedID returns the window ID of the currently highlighted row, or ""
-// if nothing is selected.
-func (t *table) selectedID(rows []WindowRow) string {
+// selectedIndex returns the slice index of the currently highlighted row,
+// or -1 if nothing valid is selected.
+func (t *table) selectedIndex() int {
 	row, _ := t.GetSelection()
-	idx := row - 1 // subtract header
-	if idx < 0 || idx >= len(rows) {
-		return ""
-	}
-	return rows[idx].ID
+	return row - 1 // subtract header row
 }
 
 // selectedRow returns the WindowRow for the currently highlighted row.
 func (t *table) selectedRow(rows []WindowRow) *WindowRow {
-	row, _ := t.GetSelection()
-	idx := row - 1
+	idx := t.selectedIndex()
 	if idx < 0 || idx >= len(rows) {
 		return nil
 	}
