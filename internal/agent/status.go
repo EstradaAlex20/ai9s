@@ -65,11 +65,11 @@ func DetectStatus(agentType AgentType, paneTitle string) Status {
 func (s Status) String() string {
 	switch s {
 	case StatusWaiting:
-		return "Waiting"
+		return "Ready"
 	case StatusWorking:
 		return "Working"
 	case StatusNeedsYou:
-		return "Needs You"
+		return "Action Required"
 	default:
 		return "Unknown"
 	}

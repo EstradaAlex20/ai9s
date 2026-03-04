@@ -102,7 +102,7 @@ func (t *table) selectedRow(rows []WindowRow) *WindowRow {
 }
 
 func statusCell(s agent.Status) *tview.TableCell {
-	text := s.Icon() + " " + s.String()
+	text := s.String()
 	color := tcell.ColorGray
 	switch s {
 	case agent.StatusWorking:
