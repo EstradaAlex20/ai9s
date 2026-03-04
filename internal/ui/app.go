@@ -15,8 +15,9 @@ type App struct {
 	header *header
 	table  *table
 	footer *footer
-	prompt *tview.InputField
-	rows   []WindowRow
+	prompt        *tview.InputField
+	promptVisible bool
+	rows          []WindowRow
 }
 
 // New creates the App with the given tmux session name and initial window list.
@@ -80,6 +81,11 @@ func (a *App) redraw() {
 }
 
 func (a *App) handleKey(event *tcell.EventKey) *tcell.EventKey {
+	// While the prompt is open, let the InputField handle everything.
+	if a.promptVisible {
+		return event
+	}
+
 	// 'a' is an alias for Enter — both switch to the selected window.
 	if event.Rune() == 'a' {
 		row, _ := a.table.GetSelection()
@@ -145,11 +151,13 @@ func (a *App) showPrompt(label, initial string, onDone func(string)) {
 			onDone(text)
 		}
 	})
+	a.promptVisible = true
 	a.root.ResizeItem(a.prompt, 1, 0)
 	a.tview.SetFocus(a.prompt)
 }
 
 func (a *App) hidePrompt() {
+	a.promptVisible = false
 	a.root.ResizeItem(a.prompt, 0, 0)
 	a.tview.SetFocus(a.table)
 }
